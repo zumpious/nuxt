@@ -55,42 +55,52 @@ Translated German markdown:"""
 
 def save_translated_markdown(translated_content, output_path):
     """Save the translated content to a new file."""
-    dir_name = os.path.dirname(output_path)
-    file_name = os.path.basename(output_path)
-    translated_path = os.path.join(dir_name, "de_" + file_name)
-
     try:
         # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(translated_path), exist_ok=True)
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-        with open(translated_path, "w", encoding="utf-8") as file:
+        with open(output_path, "w", encoding="utf-8") as file:
             file.write(translated_content)
-        print(f"Translation saved to {translated_path}")
+        print(f"Translation saved to {output_path}")
     except Exception as e:
         print(f"Error saving translation: {e}")
 
 
+def process_directory(source_dir="docs/en", target_dir="docs/de"):
+    """Process all markdown files in the source directory and its subdirectories."""
+    for root, dirs, files in os.walk(source_dir):
+        # Calculate the corresponding target directory
+        rel_path = os.path.relpath(root, source_dir)
+        target_path = os.path.join(target_dir, rel_path)
+
+        for file in files:
+            # Skip non-markdown files and .yml files
+            if not file.endswith(".md") or file.endswith(".yml"):
+                continue
+
+            source_file = os.path.join(root, file)
+            target_file = os.path.join(target_path, file)
+
+            print(f"Processing {source_file}...")
+
+            # Read the markdown content
+            content = read_markdown_file(source_file)
+
+            # Translate the content
+            print(f"Translating {source_file}...")
+            translated_content = translate_with_vllm(content)
+
+            if translated_content:
+                # Save the translated content
+                save_translated_markdown(translated_content, target_file)
+            else:
+                print(f"Translation failed for {source_file}")
+
+
 def main():
-    # Path to the markdown file
-    markdown_file = "docs/en/1.getting-started/01.introduction.md"
-    output_path = "docs/de/1.getting-started/01.introduction.md"
-    # Ensure file exists
-    if not os.path.exists(markdown_file):
-        print(f"File not found: {markdown_file}")
-        sys.exit(1)
-
-    # Read the markdown content
-    content = read_markdown_file(markdown_file)
-
-    # Translate the content
-    print("Sending to vLLM model for translation...")
-    translated_content = translate_with_vllm(content)
-
-    if translated_content:
-        # Save the translated content
-        save_translated_markdown(translated_content, output_path)
-    else:
-        print("Translation failed.")
+    print("Starting translation of all markdown files from docs/en to docs/de...")
+    process_directory()
+    print("Translation process completed.")
 
 
 if __name__ == "__main__":
