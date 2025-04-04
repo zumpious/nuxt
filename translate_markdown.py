@@ -29,7 +29,7 @@ Here's the markdown to translate:
 Translated German markdown:"""
 
     payload = {
-        "model": "deployed_model",  # Adjust if your model has a specific name
+        "model": "Qwen/Qwen2.5-7B-Instruct",  # Adjust if your model has a specific name
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.0,
         "max_tokens": 6000,
