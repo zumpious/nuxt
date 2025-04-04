@@ -60,6 +60,9 @@ def save_translated_markdown(translated_content, output_path):
     translated_path = os.path.join(dir_name, "de_" + file_name)
 
     try:
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(translated_path), exist_ok=True)
+
         with open(translated_path, "w", encoding="utf-8") as file:
             file.write(translated_content)
         print(f"Translation saved to {translated_path}")
